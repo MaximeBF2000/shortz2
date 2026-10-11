@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/*
+  Shortz design tokens.
+  A dark "edit suite" palette: plum-tinted surfaces so video reads well,
+  and caption yellow (the color of shorts captions) as the single loud accent.
+*/
+@theme {
+  --color-ink: #15121c;
+  --color-panel: #1d1927;
+  --color-raise: #272234;
+  --color-line: #352e45;
+  --color-line-strong: #4a4160;
+  --color-text: #f2eef8;
+  --color-muted: #a39bb5;
+  --color-faint: #6f6784;
+  --color-caption: #ffd83d;
+  --color-caption-ink: #241c00;
+  --color-lilac: #a58bff;
+  --color-danger: #ff7a7a;
+  --color-ok: #5ee0a0;
+
+  --font-display: var(--font-big-shoulders), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+
+  --animate-cap-pop: cap-pop 110ms ease-out;
+  --animate-rise: rise 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes cap-pop {
+    from {
+      transform: scale(0.82);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-lilac);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-caption);
+  color: var(--color-caption-ink);
+}
+
+input[type="range"] {
+  accent-color: var(--color-caption);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

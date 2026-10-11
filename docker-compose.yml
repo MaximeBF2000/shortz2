@@ -1,0 +1,59 @@
+# Shortz: docker compose up --build, then open http://localhost:3000
+
+x-backend: &backend
+  build: ./backend
+  image: shortz-backend
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    DATABASE_URL: postgresql+psycopg://shortz:shortz@db:5432/shortz
+    PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    CORS_ORIGINS: '["${PUBLIC_WEB_URL:-http://localhost:3000}"]'
+  volumes:
+    - media:/data
+    - whisper-models:/app/models/whisper
+  depends_on:
+    db:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: shortz
+      POSTGRES_PASSWORD: shortz
+      POSTGRES_DB: shortz
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shortz"]
+      interval: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    <<: *backend
+    ports:
+      - "8000:8000"
+
+  worker:
+    <<: *backend
+    command: ["python", "-m", "app.worker"]
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres:
+  media:
+  whisper-models:

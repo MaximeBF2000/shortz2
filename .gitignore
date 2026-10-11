@@ -1,0 +1,15 @@
+.env
+.DS_Store
+
+# backend
+backend/.venv/
+backend/data/
+backend/fonts/
+backend/models/
+__pycache__/
+
+# frontend
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts
+.claude/
