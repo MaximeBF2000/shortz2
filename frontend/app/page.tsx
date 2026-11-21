@@ -1,3 +1,4 @@
+import { AiStatusNotice } from "@/components/home/ai-status-notice";
 import { HeroHeadline } from "@/components/home/hero-headline";
 import { NewProjectForm } from "@/components/home/new-project-form";
 import { ProjectList } from "@/components/home/project-list";
@@ -12,6 +13,7 @@ export default function HomePage() {
           captions every word in your style.
         </p>
       </section>
+      <AiStatusNotice />
       <NewProjectForm />
       <ProjectList />
     </main>

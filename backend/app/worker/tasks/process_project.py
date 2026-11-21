@@ -13,6 +13,7 @@ from app.models import Clip, Project
 from app.models.project import ProjectStatus
 from app.pipeline import ingest, youtube
 from app.pipeline.highlights import Request, clip_words, find_clips
+from app.pipeline.transcribe import transcribe as speech_to_text
 from app.reframe.analyze import analyze_clip
 from app.services.styles import default_style_for
 from app.worker.progress import project_progress, set_project_status
@@ -62,19 +63,17 @@ def download_and_normalize(project_id: str) -> None:
 
 
 def transcribe(project_id: str) -> None:
-    from app.pipeline.transcribe import transcribe as run_whisper  # heavy import, load lazily
-
     with session_scope() as db:
         project = db.get(Project, project_id)
         if project.transcript:
             return
-        duration, language = project.duration, project.settings.get("language")
+        language = project.settings.get("language")
 
     set_project_status(project_id, ProjectStatus.TRANSCRIBING)
     folder = storage.project_dir(project_id)
     audio = folder / "audio.wav"
     ingest.extract_audio(storage.source_video(project_id), audio)
-    transcript = run_whisper(audio, duration, language, project_progress(project_id))
+    transcript = speech_to_text(audio, language, project_progress(project_id))
     audio.unlink(missing_ok=True)
     if not transcript["words"]:
         raise RuntimeError("No speech was found in this video, so there is nothing to caption.")
@@ -82,7 +81,7 @@ def transcribe(project_id: str) -> None:
     with session_scope() as db:
         project = db.get(Project, project_id)
         project.transcript = transcript
-        project.language = transcript["language"]
+        project.language = transcript["language"] or language
 
 
 def create_clips(project_id: str) -> None:

@@ -63,10 +63,19 @@ def overlap(a_start: float, a_end: float, b_start: float, b_end: float) -> float
 
 
 def clip_words(words: list[dict], start: float, end: float, keywords: list[str]) -> list[dict]:
-    """Caption words for a clip, with AI keywords flagged for emphasis."""
-    wanted = {normalize(k) for keyword in keywords for k in keyword.split()}
-    return [
-        {**w, "emphasis": normalize(w["text"]) in wanted}
-        for w in words
-        if w["start"] >= start - 0.05 and w["end"] <= end + 0.05
-    ]
+    """Caption words for a clip, with the AI's keywords flagged for emphasis.
+
+    Keywords can be phrases ("easy and fun"): only the whole phrase is emphasized,
+    so its small words don't light up everywhere else.
+    """
+    selected = [{**w, "emphasis": False} for w in words if w["start"] >= start - 0.05 and w["end"] <= end + 0.05]
+    spoken = [normalize(w["text"]) for w in selected]
+    for keyword in keywords:
+        phrase = [normalize(part) for part in keyword.split() if normalize(part)]
+        if not phrase:
+            continue
+        for i in range(len(spoken) - len(phrase) + 1):
+            if spoken[i : i + len(phrase)] == phrase:
+                for word in selected[i : i + len(phrase)]:
+                    word["emphasis"] = True
+    return selected

@@ -10,9 +10,14 @@ x-backend: &backend
     DATABASE_URL: postgresql+psycopg://shortz:shortz@db:5432/shortz
     PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
     CORS_ORIGINS: '["${PUBLIC_WEB_URL:-http://localhost:3000}"]'
+    # All AI runs on the host machine (its GPU), not in containers:
+    # Ollama picks clips, the Shortz AI service (ai-server/) transcribes.
+    OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+    TRANSCRIBER_URL: ${TRANSCRIBER_URL:-http://host.docker.internal:8765}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"  # needed on Linux, harmless elsewhere
   volumes:
     - media:/data
-    - whisper-models:/app/models/whisper
   depends_on:
     db:
       condition: service_healthy
@@ -56,4 +61,3 @@ services:
 volumes:
   postgres:
   media:
-  whisper-models:

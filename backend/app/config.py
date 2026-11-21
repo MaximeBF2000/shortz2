@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -18,14 +19,16 @@ class Settings(BaseSettings):
     public_api_url: str = "http://localhost:8000"
     cors_origins: list[str] = ["http://localhost:3000"]
 
-    # Transcription (faster-whisper)
-    whisper_model: str = "small"
-    whisper_device: str = "auto"
-    whisper_compute_type: str = "int8"
+    # Transcription: the Shortz AI service running on the host Mac (see ai-server/).
+    transcriber_url: str = "http://localhost:8765"
 
-    # Clip detection. Without a key, a simple heuristic picks clips instead.
-    anthropic_api_key: str | None = None
-    anthropic_model: str = "claude-opus-5-5"
+    # Clip detection: a local Ollama model, or "heuristic" (no AI, picks by pace).
+    clip_finder: Literal["ollama", "heuristic"] = "ollama"
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen3.6:35b-mlx"
+    ollama_context: int = 32768  # tokens; longer transcripts are split into parts
+    ollama_think: bool = True  # let the model reason first: slower, better picks
+    ollama_timeout: float = 900  # seconds per request
 
     # YouTube downloads
     ytdlp_cookies_file: Path | None = None

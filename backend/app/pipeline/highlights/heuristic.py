@@ -1,4 +1,4 @@
-"""Pick clips without an LLM: used when no Anthropic API key is configured.
+"""Pick clips without an LLM: used when CLIP_FINDER=heuristic.
 
 Scores windows of whole transcript segments by speaking pace and by
 "hooky" punctuation (questions, exclamations, numbers). Crude, but it gives
@@ -44,7 +44,7 @@ def find_with_heuristic(request: Request) -> list[Candidate]:
                 start=start,
                 end=end,
                 title=" ".join(words[:8]).rstrip(",.") or "Untitled clip",
-                reason="Picked for its pace and energy (set an Anthropic API key for AI picks).",
+                reason="Picked for its pace and energy.",
                 score=round(40 + 45 * score / best),
             )
         )

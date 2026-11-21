@@ -1,4 +1,4 @@
-"""The instructions given to Claude for picking clips."""
+"""The instructions given to the model for picking clips."""
 
 from app.pipeline.highlights.types import Request
 

@@ -8,6 +8,8 @@ from app.captions.metrics import line_ratio
 from app.captions.presets import PRESETS
 from app.captions.style import CaptionStyle
 from app.config import get_settings
+from app.pipeline.highlights.ollama import ollama_status
+from app.pipeline.transcribe import transcriber_status
 
 router = APIRouter(prefix="/api", tags=["catalog"])
 
@@ -40,4 +42,9 @@ def list_presets():
 
 @router.get("/health")
 def health():
-    return {"ok": True, "ai_clip_finder": bool(get_settings().anthropic_api_key)}
+    settings = get_settings()
+    if settings.clip_finder == "heuristic":
+        clip_finder = {"engine": "heuristic", "model": None, "ready": True, "problem": None}
+    else:
+        clip_finder = {"engine": "ollama", "model": settings.ollama_model, **ollama_status()}
+    return {"ok": True, "transcriber": transcriber_status(), "clip_finder": clip_finder}
