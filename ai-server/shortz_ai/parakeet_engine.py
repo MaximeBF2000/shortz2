@@ -1,4 +1,4 @@
-"""Transcription with NVIDIA Parakeet TDT, running on MLX."""
+"""English transcription with NVIDIA Parakeet TDT, running on MLX."""
 
 from collections.abc import Callable
 from functools import lru_cache

@@ -97,6 +97,7 @@ def create_clips(project_id: str) -> None:
             max_clips=int(settings.get("max_clips", 8)),
             focus=settings.get("focus", ""),
             title=project.title,
+            language=project.language,
         )
 
     candidates = find_clips(request)

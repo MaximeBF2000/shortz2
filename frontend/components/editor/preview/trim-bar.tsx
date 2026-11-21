@@ -5,7 +5,7 @@ import useSWR from "swr";
 
 import { fetcher } from "@/lib/api";
 import { formatTimecode } from "@/lib/format";
-import { seekVideo } from "@/lib/video";
+import { startScrubbing, type Scrubber } from "@/lib/video";
 import type { Clip, TranscriptWord } from "@/lib/types";
 
 const MIN_LENGTH = 3;
@@ -16,17 +16,20 @@ interface Props {
   duration: number;
   time: number;
   video: HTMLVideoElement | null;
-  onSeek: (t: number) => void;
   onTrim: (start: number, end: number) => void;
 }
 
 /**
- * A zoomed timeline around the clip. Drag the handles to trim; cuts snap to
- * word boundaries so captions never start or end mid-word.
+ * A zoomed timeline around the clip.
+ * - Drag anywhere on it to scrub: the preview follows the cursor frame by frame.
+ * - Drag the yellow handles to trim; cuts snap to word boundaries so captions
+ *   never start or end mid-word.
  */
-export function TrimBar({ clip, duration, time, video, onSeek, onTrim }: Props) {
+export function TrimBar({ clip, duration, time, video, onTrim }: Props) {
   const track = useRef<HTMLDivElement>(null);
+  const scrubber = useRef<Scrubber | null>(null);
   const [drag, setDrag] = useState<{ edge: "start" | "end"; start: number; end: number } | null>(null);
+  const [scrubTime, setScrubTime] = useState<number | null>(null);
   const { data: transcript } = useSWR<{ words: TranscriptWord[] }>(`/api/projects/${clip.project_id}/transcript`, fetcher, {
     revalidateOnFocus: false,
   });
@@ -44,50 +47,78 @@ export function TrimBar({ clip, duration, time, video, onSeek, onTrim }: Props) 
     return viewStart + ((clientX - rect.left) / rect.width) * (viewEnd - viewStart);
   }
 
-  function onPointerDown(edge: "start" | "end", event: React.PointerEvent) {
+  function onHandleDown(edge: "start" | "end", event: React.PointerEvent) {
     event.stopPropagation();
-    (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    track.current!.setPointerCapture(event.pointerId);
     setDrag({ edge, start: clip.start, end: clip.end });
+    if (video) scrubber.current = startScrubbing(video);
+  }
+
+  function onTrackDown(event: React.PointerEvent) {
+    if (!video) return;
+    track.current!.setPointerCapture(event.pointerId);
+    scrubber.current = startScrubbing(video);
+    scrubTo(event.clientX);
+  }
+
+  function scrubTo(clientX: number) {
+    const t = clamp(timeAt(clientX), viewStart, viewEnd - 0.05);
+    setScrubTime(t);
+    scrubber.current?.to(t);
   }
 
   function onPointerMove(event: React.PointerEvent) {
-    if (!drag) return;
-    const t = timeAt(event.clientX);
-    const next =
-      drag.edge === "start"
-        ? { ...drag, start: clamp(t, Math.max(0, drag.end - MAX_LENGTH), drag.end - MIN_LENGTH) }
-        : { ...drag, end: clamp(t, drag.start + MIN_LENGTH, Math.min(duration, drag.start + MAX_LENGTH)) };
-    setDrag(next);
-    if (video) seekVideo(video, drag.edge === "start" ? next.start : next.end); // show the frame under the handle
+    if (drag) {
+      const t = timeAt(event.clientX);
+      const next =
+        drag.edge === "start"
+          ? { ...drag, start: clamp(t, Math.max(0, drag.end - MAX_LENGTH), drag.end - MIN_LENGTH) }
+          : { ...drag, end: clamp(t, drag.start + MIN_LENGTH, Math.min(duration, drag.start + MAX_LENGTH)) };
+      setDrag(next);
+      scrubber.current?.to(drag.edge === "start" ? next.start : next.end); // show the frame under the handle
+    } else if (scrubTime !== null) {
+      scrubTo(event.clientX);
+    }
   }
 
   function onPointerUp() {
-    if (!drag) return;
-    const snappedStart = snap(words, drag.start, "start");
-    const snappedEnd = snap(words, drag.end, "end");
-    setDrag(null);
-    if (snappedStart !== clip.start || snappedEnd !== clip.end) onTrim(snappedStart, snappedEnd);
+    if (drag) {
+      const snappedStart = snap(words, drag.start, "start");
+      const snappedEnd = snap(words, drag.end, "end");
+      scrubber.current?.end(drag.edge === "start" ? snappedStart : snappedEnd);
+      setDrag(null);
+      if (snappedStart !== clip.start || snappedEnd !== clip.end) onTrim(snappedStart, snappedEnd);
+    } else if (scrubTime !== null) {
+      scrubber.current?.end(scrubTime);
+      setScrubTime(null);
+    }
+    scrubber.current = null;
   }
+
+  const playhead = scrubTime ?? time;
 
   return (
     <div>
       <div
         ref={track}
-        className="relative h-14 cursor-pointer touch-none rounded-xl bg-panel select-none"
+        className="relative h-14 cursor-ew-resize touch-none rounded-xl bg-panel select-none"
+        onPointerDown={onTrackDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onClick={(event) => !drag && onSeek(timeAt(event.clientX))}
+        onPointerCancel={onPointerUp}
       >
         <WordTicks words={words} viewStart={viewStart} viewEnd={viewEnd} />
         <div
           className="absolute inset-y-0 rounded-lg border-2 border-caption bg-caption/10"
           style={{ left: `${toPercent(start)}%`, width: `${toPercent(end) - toPercent(start)}%` }}
         >
-          <Handle side="left" label="Trim start" value={start} onPointerDown={(e) => onPointerDown("start", e)} />
-          <Handle side="right" label="Trim end" value={end} onPointerDown={(e) => onPointerDown("end", e)} />
+          <Handle side="left" label="Trim start" value={start} onPointerDown={(e) => onHandleDown("start", e)} />
+          <Handle side="right" label="Trim end" value={end} onPointerDown={(e) => onHandleDown("end", e)} />
         </div>
-        {!drag && time >= viewStart && time <= viewEnd && (
-          <div className="pointer-events-none absolute -inset-y-1 w-0.5 rounded bg-text" style={{ left: `${toPercent(time)}%` }} />
+        {!drag && playhead >= viewStart && playhead <= viewEnd && (
+          <div className="pointer-events-none absolute -inset-y-1 w-0.5 rounded bg-text" style={{ left: `${toPercent(playhead)}%` }}>
+            <span className="absolute -top-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full bg-text" />
+          </div>
         )}
       </div>
       <div className="tabular mt-1.5 flex justify-between text-[11px] text-faint">
@@ -117,7 +148,6 @@ function Handle({ side, label, value, onPointerDown }: HandleProps) {
       aria-valuetext={formatTimecode(value)}
       tabIndex={0}
       onPointerDown={onPointerDown}
-      onClick={(e) => e.stopPropagation()}
       className={`absolute inset-y-0 w-3 cursor-ew-resize bg-caption ${side === "left" ? "-left-1.5 rounded-l-lg" : "-right-1.5 rounded-r-lg"}`}
     >
       <span className="absolute inset-y-4 left-1/2 w-0.5 -translate-x-1/2 rounded bg-caption-ink/50" />

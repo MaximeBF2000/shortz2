@@ -7,6 +7,7 @@ import type { ClipPlayer } from "@/lib/hooks/use-clip-player";
 import type { Clip, ClipChanges, Project } from "@/lib/types";
 
 import { ClipPreview } from "./clip-preview";
+import { SpeedPicker } from "./speed-picker";
 import { TrimBar } from "./trim-bar";
 
 interface Props {
@@ -50,16 +51,18 @@ export function PreviewPanel({ project, clip, update, player, video }: Props) {
           >
             {player.playing ? <Pause className="size-4 fill-current" /> : <Play className="ml-0.5 size-4 fill-current" />}
           </button>
-          <span className="tabular text-sm">
+          <span className="tabular text-sm whitespace-nowrap">
             {formatTimecode(elapsed)} <span className="text-faint">/ {formatTimecode(clip.end - clip.start)}</span>
           </span>
-          <span className="ml-auto text-[12px] text-faint">Space to play · drag the yellow handles to trim</span>
+          <SpeedPicker rate={player.rate} onChange={player.setRate} />
+          <span className="ml-auto hidden text-right text-[12px] text-faint 2xl:block">
+            Space to play · drag the timeline to scrub · drag the yellow handles to trim
+          </span>
         </div>
         <TrimBar
           clip={clip}
           duration={project.duration ?? clip.end}
           time={player.time}
-          onSeek={player.seek}
           onTrim={(start, end) => update({ start, end })}
           video={video}
         />

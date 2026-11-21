@@ -27,7 +27,7 @@ the app itself.
 | Runs on your Mac | Runs in Docker |
 | --- | --- |
 | **Ollama**: picks the clips (`qwen3.6:35b-mlx`) | **web**: the Next.js site (port 3000) |
-| **Shortz AI** (`ai-server/`): speech-to-text with Parakeet, or Whisper for languages Parakeet doesn't cover, both on MLX (port 8765) | **api**: FastAPI (port 8000) |
+| **Shortz AI** (`ai-server/`): language detection and speech-to-text with Whisper and Parakeet, on MLX (port 8765) | **api**: FastAPI (port 8000) |
 | | **worker**: downloads, video processing, face tracking, rendering |
 | | **db**: Postgres |
 
@@ -45,8 +45,8 @@ You need [Docker Desktop](https://www.docker.com/products/docker-desktop/),
    cd ai-server
    uv run shortz-ai
    ```
-   The first start downloads Parakeet (about 1.2 GB). The Whisper model is only
-   downloaded the first time you pick a language Parakeet doesn't support.
+   The first start downloads Parakeet (about 1.2 GB); Whisper (about 1.6 GB) is
+   downloaded the first time it's needed. Both are then cached.
 3. Start the app:
    ```bash
    cp .env.example .env
@@ -63,9 +63,11 @@ machines use `qwen3.6:35b-a3b`.
 
 ### Languages
 
-Parakeet (fast, the default) covers 25 European languages, English and French included,
-and detects which one is spoken. If you pick another language when creating a project
-(Japanese, Chinese, Korean, Hindi, Arabic…), Shortz uses Whisper large-v3-turbo instead.
+Captions are always in the language spoken in the video. Unless you pick a language when
+creating a project, Whisper listens to a few 30‑second samples and detects it. English
+is then transcribed by Parakeet (fastest and most accurate); every other language by
+Whisper large-v3-turbo. Parakeet's own language detection isn't used: it sometimes
+translates non-English speech into English.
 
 ## Configuration
 
@@ -113,8 +115,8 @@ Redis or Celery is needed. Run more `worker` containers to process more videos a
 ai-server/               runs natively on the Mac (MLX), not in Docker
   shortz_ai/
     server.py            HTTP API: POST /transcribe streams progress, then the transcript
-    parakeet_engine.py   Parakeet TDT 0.6B v3
-    whisper_engine.py    Whisper large-v3-turbo, for other languages
+    parakeet_engine.py   Parakeet TDT 0.6B v3, for English
+    whisper_engine.py    Whisper large-v3-turbo: language detection + other languages
     languages.py         which engine handles which language
 backend/
   app/

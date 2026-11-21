@@ -42,10 +42,11 @@ def transcribe(audio: UploadFile = File(...), language: str = Form("")):
     def work() -> None:
         try:
             progress = lambda value: events.put({"progress": round(min(1.0, value), 3)})  # noqa: E731
-            if pick_engine(language or None) == "whisper":
-                result = whisper_engine.transcribe(path, language, progress)
+            spoken = language or whisper_engine.detect_language(path)
+            if pick_engine(spoken) == "parakeet":
+                result = {**parakeet_engine.transcribe(path, progress), "language": spoken}
             else:
-                result = parakeet_engine.transcribe(path, progress)
+                result = whisper_engine.transcribe(path, spoken, progress)
             events.put({"result": result})
         except Exception as error:  # report it to the worker instead of dropping the connection
             events.put({"error": f"{type(error).__name__}: {error}"})

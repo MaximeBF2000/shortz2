@@ -43,6 +43,9 @@ def test_ass_highlights_the_spoken_word():
     assert f"{{\\1c{highlight}}}WORLD" in events[1]
 
 
-def test_ass_includes_hook():
-    ass = build_ass(words("hi"), hook="Watch this", style=ClipStyle(), duration=5)
+def test_ass_includes_hook_when_enabled():
+    style = ClipStyle()
+    assert "Watch this" not in build_ass(words("hi"), hook="Watch this", style=style, duration=5)
+    style.hook.enabled = True
+    ass = build_ass(words("hi"), hook="Watch this", style=style, duration=5)
     assert "Hook,,0,0,0,," in ass and "Watch this" in ass

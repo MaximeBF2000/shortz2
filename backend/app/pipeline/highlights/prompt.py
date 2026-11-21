@@ -35,6 +35,11 @@ def build_user_message(request: Request) -> str:
         f"Clip length: between {low:.0f} and {high:.0f} seconds.",
         f"Return up to {request.max_clips} clips. Fewer is fine if the video doesn't have that many strong moments.",
     ]
+    if request.language:
+        lines.append(
+            f"The video is in the language with ISO code '{request.language}'. Write the title, hook "
+            "and reason in that language, and copy keywords exactly as spoken."
+        )
     if request.focus.strip():
         lines.append(f"The creator wants clips about: {request.focus.strip()}")
     lines.append("")

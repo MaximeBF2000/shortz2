@@ -1,17 +1,11 @@
-"""Which engine transcribes which language."""
+"""Which engine transcribes which language.
 
-# Languages Parakeet TDT 0.6B v3 understands. Everything else goes to Whisper.
-PARAKEET_LANGUAGES = {
-    "bg", "hr", "cs", "da", "nl", "en", "et", "fi", "fr", "de", "el", "hu", "it",
-    "lv", "lt", "mt", "pl", "pt", "ro", "sk", "sl", "es", "sv", "ru", "uk",
-}  # fmt: skip
+Parakeet is the fastest and most accurate for English, but its automatic language
+detection is unreliable (a French video can come out translated to English) and
+it can't be told which language to use. So Whisper decides the language, and
+handles everything that isn't English.
+"""
 
 
-def pick_engine(language: str | None) -> str:
-    """Parakeet is much faster; Whisper covers ~100 languages.
-
-    With no language given we use Parakeet, which detects among its 25 languages.
-    """
-    if language and language not in PARAKEET_LANGUAGES:
-        return "whisper"
-    return "parakeet"
+def pick_engine(language: str) -> str:
+    return "parakeet" if language == "en" else "whisper"

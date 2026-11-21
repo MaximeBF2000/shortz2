@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { seekVideo, togglePlayback } from "../video";
+import { seekVideo, setPlaybackRate, togglePlayback } from "../video";
 
 /**
  * Plays the source video only between `start` and `end`, looping.
@@ -11,6 +11,11 @@ import { seekVideo, togglePlayback } from "../video";
 export function useClipPlayer(video: HTMLVideoElement | null, start: number, end: number) {
   const [time, setTime] = useState(start);
   const [playing, setPlaying] = useState(false);
+  const [rate, setRate] = useState(1);
+
+  useEffect(() => {
+    if (video) setPlaybackRate(video, rate);
+  }, [video, rate]);
 
   // Jump to the clip when it (or its trim) changes.
   useEffect(() => {
@@ -61,7 +66,7 @@ export function useClipPlayer(video: HTMLVideoElement | null, start: number, end
     [video, start, end],
   );
 
-  return { time, playing, toggle, seek };
+  return { time, playing, toggle, seek, rate, setRate };
 }
 
 export type ClipPlayer = ReturnType<typeof useClipPlayer>;

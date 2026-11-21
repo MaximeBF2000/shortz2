@@ -20,6 +20,7 @@ class Request:
     max_clips: int = 8
     focus: str = ""
     title: str = ""
+    language: str | None = None  # ISO code of the spoken language, e.g. "fr"
 
     @property
     def length_range(self) -> tuple[float, float]:

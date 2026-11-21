@@ -18,7 +18,7 @@ export const DEFAULT_STYLE: ClipStyle = {
     animation: "pop",
   },
   hook: {
-    enabled: true,
+    enabled: false,
     duration: 3,
     font: "Montserrat",
     font_size: 58,
