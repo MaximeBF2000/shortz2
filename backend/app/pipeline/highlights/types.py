@@ -32,7 +32,6 @@ class Candidate:
     start: float
     end: float
     title: str
-    hook: str = ""
     reason: str = ""
     score: int = 50
     keywords: list[str] = field(default_factory=list)

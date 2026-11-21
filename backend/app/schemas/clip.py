@@ -30,7 +30,6 @@ class ClipOut(BaseModel):
     project_id: str
     rank: int
     title: str
-    hook: str
     reason: str
     score: int
     start: float
@@ -49,7 +48,6 @@ class ClipUpdate(BaseModel):
     """Every field is optional: send only what changed."""
 
     title: str | None = Field(None, max_length=300)
-    hook: str | None = Field(None, max_length=300)
     start: float | None = None
     end: float | None = None
     words: list[CaptionWord] | None = None

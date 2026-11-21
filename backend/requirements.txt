@@ -6,6 +6,4 @@ psycopg[binary]==3.2.10
 pydantic-settings==2.11.0
 httpx>=0.28
 yt-dlp[default]>=2025.11.12
-opencv-python-headless==4.12.0.88
-numpy>=2.0,<2.3
 fonttools==4.60.1

@@ -8,14 +8,14 @@ import type { Clip, ClipChanges, Project } from "@/lib/types";
 
 import { CaptionsPanel } from "./captions-panel";
 import { FramingPanel } from "./framing-panel";
-import { OverlaysPanel } from "./overlays-panel";
+import { LogoPanel } from "./logo-panel";
 import { TranscriptPanel } from "./transcript-panel";
 
 const TABS = [
   { id: "captions", label: "Captions" },
   { id: "transcript", label: "Words" },
   { id: "framing", label: "Framing" },
-  { id: "overlays", label: "Hook & logo" },
+  { id: "logo", label: "Logo" },
 ] as const;
 
 type Tab = (typeof TABS)[number]["id"];
@@ -54,7 +54,7 @@ export function Inspector(props: PanelProps) {
         {tab === "captions" && <CaptionsPanel {...props} />}
         {tab === "transcript" && <TranscriptPanel {...props} />}
         {tab === "framing" && <FramingPanel {...props} />}
-        {tab === "overlays" && <OverlaysPanel {...props} />}
+        {tab === "logo" && <LogoPanel {...props} />}
       </div>
     </aside>
   );

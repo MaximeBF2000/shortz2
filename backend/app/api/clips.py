@@ -31,8 +31,6 @@ def update_clip(clip_id: str, body: ClipUpdate, db: Session = Depends(get_db)):
 
     if "title" in changes:
         clip.title = body.title or "Untitled clip"
-    if "hook" in changes:
-        clip.hook = body.hook or ""
     if body.words is not None:
         clip.words = [w.model_dump() for w in body.words]
     if body.style is not None:

@@ -14,7 +14,7 @@ from app.models.project import ProjectStatus
 from app.pipeline import ingest, youtube
 from app.pipeline.highlights import Request, clip_words, find_clips
 from app.pipeline.transcribe import transcribe as speech_to_text
-from app.reframe.analyze import analyze_clip
+from app.pipeline.reframe import analyze_clip, write_thumbnail
 from app.services.styles import default_style_for
 from app.worker.progress import project_progress, set_project_status
 
@@ -113,7 +113,6 @@ def create_clips(project_id: str) -> None:
                     project_id=project_id,
                     rank=rank,
                     title=candidate.title[:300],
-                    hook=candidate.hook[:300],
                     reason=candidate.reason,
                     score=candidate.score,
                     start=candidate.start,
@@ -130,11 +129,15 @@ def frame_clips(project_id: str) -> None:
     report = project_progress(project_id)
     source = storage.source_video(project_id)
     with session_scope() as db:
-        clips = [(c.id, c.start, c.end) for c in db.get(Project, project_id).clips]
+        project = db.get(Project, project_id)
+        width, height = project.width, project.height
+        clips = [(c.id, c.start, c.end) for c in project.clips]
 
     for index, (clip_id, start, end) in enumerate(clips):
-        thumbnail = storage.clip_dir(project_id, clip_id) / "thumb.jpg"
-        track = analyze_clip(source, start, end, thumbnail)
+        folder = storage.clip_dir(project_id, clip_id)
+        thumbnail = folder / "thumb.jpg"
+        track = analyze_clip(source, start, end, width, height, folder)
+        write_thumbnail(source, track, start + min(1.0, (end - start) / 3), width, height, thumbnail)
         with session_scope() as db:
             clip = db.get(Clip, clip_id)
             clip.framing = {**clip.framing, "track": track}

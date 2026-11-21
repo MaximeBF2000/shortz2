@@ -49,7 +49,6 @@ def clip_out(clip: Clip) -> ClipOut:
         project_id=clip.project_id,
         rank=clip.rank,
         title=clip.title,
-        hook=clip.hook,
         reason=clip.reason,
         score=clip.score,
         start=clip.start,

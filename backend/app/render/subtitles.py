@@ -1,4 +1,4 @@
-"""Build an .ass subtitle file (captions + hook) for a clip.
+"""Build an .ass subtitle file (the captions) for a clip.
 
 The video is rendered at 1080x1920 and the .ass file uses the same coordinates,
 so every size in ClipStyle maps 1:1 to output pixels.
@@ -7,10 +7,9 @@ so every size in ClipStyle maps 1:1 to output pixels.
 from app.captions.fonts import get_font
 from app.captions.metrics import line_ratio
 from app.captions.pages import Page, Word, build_pages
-from app.captions.style import CaptionStyle, ClipStyle, HookStyle
+from app.captions.style import CaptionStyle, ClipStyle
 
 WIDTH, HEIGHT = 1080, 1920
-HOOK_TEXT_WIDTH = 860
 
 
 def ass_color(hex_color: str, alpha: int = 0) -> str:
@@ -33,23 +32,18 @@ def escape(text: str) -> str:
     return text.replace("\\", "\\\\").replace("{", "(").replace("}", ")")
 
 
-def build_ass(words: list[Word], hook: str, style: ClipStyle, duration: float) -> str:
-    captions, hook_style = style.captions, style.hook
-    lines = [header(captions, hook_style)]
-    if hook_style.enabled and hook.strip():
-        lines.append(hook_event(hook, hook_style, min(hook_style.duration, duration)))
+def build_ass(words: list[Word], style: ClipStyle) -> str:
+    captions = style.captions
+    lines = [header(captions)]
     if captions.enabled:
         lines.extend(caption_events(words, captions))
     return "\n".join(lines) + "\n"
 
 
-def header(captions: CaptionStyle, hook: HookStyle) -> str:
+def header(captions: CaptionStyle) -> str:
     caption_font = get_font(captions.font)
-    hook_font = get_font(hook.font)
     caption_size = round(captions.font_size * line_ratio(caption_font.family))
-    hook_size = round(hook.font_size * line_ratio(hook_font.family))
     shadow = 5 if captions.shadow else 0
-    box = ass_color(hook.background_color)
     return "\n".join(
         [
             "[Script Info]",
@@ -66,33 +60,11 @@ def header(captions: CaptionStyle, hook: HookStyle) -> str:
             f"Style: Caption,{caption_font.family},{caption_size},{ass_color(captions.text_color)},"
             f"{ass_color(captions.text_color)},{ass_color(captions.stroke_color)},&H80000000,"
             f"0,0,0,0,100,100,0,0,1,{captions.stroke_width},{shadow},5,40,40,0,1",
-            f"Style: Hook,{hook_font.family},{hook_size},{ass_color(hook.text_color)},"
-            f"{ass_color(hook.text_color)},{box},{box},0,0,0,0,100,100,0,0,3,18,0,5,40,40,0,1",
             "",
             "[Events]",
             "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
         ]
     )
-
-
-def hook_event(hook: str, style: HookStyle, duration: float) -> str:
-    max_chars = max(8, int(HOOK_TEXT_WIDTH / (0.55 * style.font_size)))
-    text = r"\N".join(wrap(escape(hook.strip()), max_chars))
-    y = round(style.position * HEIGHT)
-    return (
-        f"Dialogue: 1,{ass_time(0)},{ass_time(duration)},Hook,,0,0,0,,"
-        f"{{\\an5\\pos({WIDTH // 2},{y})\\fad(150,200)}}{text}"
-    )
-
-
-def wrap(text: str, max_chars: int) -> list[str]:
-    lines: list[str] = []
-    for word in text.split():
-        if lines and len(lines[-1]) + 1 + len(word) <= max_chars:
-            lines[-1] += " " + word
-        else:
-            lines.append(word)
-    return lines
 
 
 def caption_events(words: list[Word], style: CaptionStyle) -> list[str]:

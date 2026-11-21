@@ -4,8 +4,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     DATA_DIR=/data \
-    FONTS_DIR=/app/fonts \
-    MODELS_DIR=/app/models
+    FONTS_DIR=/app/fonts
 
 # ffmpeg (built with libass) renders the clips.
 RUN apt-get update \
@@ -20,7 +19,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
-# Caption fonts + face detection model, baked into the image.
+# Caption fonts, baked into the image.
 RUN python -m scripts.download_assets
 
 EXPOSE 8000

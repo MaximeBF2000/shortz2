@@ -43,7 +43,6 @@ def render_clip(clip_id: str) -> None:
                 for w in clip.words
                 if not w.get("hidden")
             ],
-            hook=clip.hook,
             logo=storage.absolute(kit.logo) if kit and kit.logo else None,
             work_dir=folder / "render",
             output=folder / f"{slugify(clip.title)}.mp4",

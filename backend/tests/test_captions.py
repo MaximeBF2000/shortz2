@@ -35,17 +35,9 @@ def test_ass_helpers():
 def test_ass_highlights_the_spoken_word():
     style = ClipStyle()
     style.captions.animation = "highlight"
-    ass = build_ass(words("hello", "world"), hook="", style=style, duration=2)
+    ass = build_ass(words("hello", "world"), style=style)
     events = [line for line in ass.splitlines() if line.startswith("Dialogue")]
     assert len(events) == 2  # one per spoken word
     highlight = ass_color(style.captions.highlight_color)
     assert f"{{\\1c{highlight}}}HELLO" in events[0]
     assert f"{{\\1c{highlight}}}WORLD" in events[1]
-
-
-def test_ass_includes_hook_when_enabled():
-    style = ClipStyle()
-    assert "Watch this" not in build_ass(words("hi"), hook="Watch this", style=style, duration=5)
-    style.hook.enabled = True
-    ass = build_ass(words("hi"), hook="Watch this", style=style, duration=5)
-    assert "Hook,,0,0,0,," in ass and "Watch this" in ass

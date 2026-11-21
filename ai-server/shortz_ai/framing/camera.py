@@ -7,7 +7,7 @@ jumps instantly on hard cuts.
 
 from dataclasses import dataclass, field
 
-from app.reframe.faces import Face
+from shortz_ai.framing.vision import Face
 
 DEAD_ZONE = 0.18  # fraction of the crop width the subject can drift before we move
 EASE = 0.3  # how much of the remaining distance we cover per sample

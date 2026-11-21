@@ -27,7 +27,6 @@ class Clip(IdMixin, TimestampMixin, Base):
     rank: Mapped[int] = mapped_column(Integer, default=0)
 
     title: Mapped[str] = mapped_column(String(300))
-    hook: Mapped[str] = mapped_column(String(300), default="")  # headline shown over the first seconds
     reason: Mapped[str] = mapped_column(Text, default="")  # why this moment works
     score: Mapped[int] = mapped_column(Integer, default=50)  # 0-100 virality estimate
 

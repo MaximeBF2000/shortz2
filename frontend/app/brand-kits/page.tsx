@@ -32,7 +32,7 @@ export default function BrandKitsPage() {
         <div>
           <h1 className="font-display text-[clamp(44px,6vw,72px)] leading-[0.9] font-black uppercase">Brand kits</h1>
           <p className="mt-3 max-w-lg text-[15px] text-muted">
-            Save your caption look, hook style and logo once. New clips start with your default kit.
+            Save your caption look and logo once. New clips start with your default kit.
           </p>
         </div>
         <Button variant="primary" onClick={create}>

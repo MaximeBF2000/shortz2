@@ -11,16 +11,16 @@ interface ServiceStatus {
 }
 
 interface Health {
-  transcriber: ServiceStatus;
+  ai_service: ServiceStatus;
   clip_finder: ServiceStatus;
 }
 
 /** Warns before a video is submitted if one of the AI services on this machine isn't ready. */
 export function AiStatusNotice() {
   const { data } = useSWR<Health>("/api/health", fetcher, {
-    refreshInterval: (d) => (d && d.transcriber.ready && d.clip_finder.ready ? 0 : 5000),
+    refreshInterval: (d) => (d && d.ai_service.ready && d.clip_finder.ready ? 0 : 5000),
   });
-  const problems = data ? [data.transcriber, data.clip_finder].filter((s) => !s.ready).map((s) => s.problem) : [];
+  const problems = data ? [data.ai_service, data.clip_finder].filter((s) => !s.ready).map((s) => s.problem) : [];
   if (!problems.length) return null;
 
   return (

@@ -5,7 +5,6 @@ import { Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { CaptionStyleEditor, Group } from "@/components/style/caption-style-editor";
-import { HookStyleEditor } from "@/components/style/hook-style-editor";
 import { LogoStyleEditor } from "@/components/style/logo-style-editor";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
@@ -89,9 +88,6 @@ export function BrandKitEditor({ kit, onChange, onDelete }: { kit: BrandKit; onC
             <CaptionStyleEditor value={style.captions} onChange={(captions) => schedule({ style: { ...style, captions } })} />
           </Group>
           <div className="space-y-10">
-            <Group title="Hook headline">
-              <HookStyleEditor value={style.hook} onChange={(hook) => schedule({ style: { ...style, hook } })} />
-            </Group>
             <Group title="Logo">
               <LogoUpload kit={kit} onChange={onChange} />
               {kit.logo_url && <LogoStyleEditor value={style.logo} onChange={(logo) => schedule({ style: { ...style, logo } })} />}

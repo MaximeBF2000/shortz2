@@ -61,8 +61,8 @@ def test_whisper_fragments_are_merged():
 def test_ollama_response_is_parsed(monkeypatch):
     answer = {
         "clips": [
-            {"start": 12.0, "end": 41.5, "title": "Why", "hook": "Watch", "score": 140, "reason": "r", "keywords": [" w3 "]},
-            {"start": 50, "end": 40, "title": "backwards", "hook": "", "score": 50, "reason": "", "keywords": []},
+            {"start": 12.0, "end": 41.5, "title": "Why", "score": 140, "reason": "r", "keywords": [" w3 "]},
+            {"start": 50, "end": 40, "title": "backwards", "score": 50, "reason": "", "keywords": []},
         ]
     }
     sent = {}

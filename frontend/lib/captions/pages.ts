@@ -71,15 +71,3 @@ export function activeWordIndex(page: Page, t: number): number {
   });
   return active;
 }
-
-/** Wrap hook text the same way backend/app/render/subtitles.py does. */
-export function wrapHook(text: string, fontSize: number): string[] {
-  const maxChars = Math.max(8, Math.floor(860 / (0.55 * fontSize)));
-  const lines: string[] = [];
-  for (const word of text.trim().split(/\s+/).filter(Boolean)) {
-    const last = lines[lines.length - 1];
-    if (last !== undefined && last.length + 1 + word.length <= maxChars) lines[lines.length - 1] = `${last} ${word}`;
-    else lines.push(word);
-  }
-  return lines;
-}

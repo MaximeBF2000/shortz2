@@ -84,16 +84,6 @@ export interface CaptionStyle {
   animation: Animation;
 }
 
-export interface HookStyle {
-  enabled: boolean;
-  duration: number;
-  font: string;
-  font_size: number;
-  text_color: string;
-  background_color: string;
-  position: number;
-}
-
 export interface LogoStyle {
   enabled: boolean;
   corner: LogoCorner;
@@ -103,7 +93,6 @@ export interface LogoStyle {
 
 export interface ClipStyle {
   captions: CaptionStyle;
-  hook: HookStyle;
   logo: LogoStyle;
   brand_kit_id: string | null;
 }
@@ -115,7 +104,6 @@ export interface Clip {
   project_id: string;
   rank: number;
   title: string;
-  hook: string;
   reason: string;
   score: number;
   start: number;
@@ -133,7 +121,6 @@ export interface Clip {
 /** Fields of a clip the user can change. */
 export interface ClipChanges {
   title?: string;
-  hook?: string;
   start?: number;
   end?: number;
   words?: CaptionWord[];

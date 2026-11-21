@@ -1,4 +1,4 @@
-"""Download caption fonts and the face detection model.
+"""Download the caption fonts.
 
 Run once (the Docker image does it at build time):
     python -m scripts.download_assets
@@ -11,7 +11,6 @@ from fontTools.ttLib import TTFont
 
 from app.captions.fonts import CAPTION_FONTS, CaptionFont
 from app.config import get_settings
-from app.reframe.faces import MODEL_FILE, MODEL_URL
 
 FONT_URL = "https://cdn.jsdelivr.net/fontsource/fonts/{id}@latest/latin-{weight}-normal.ttf"
 
@@ -52,7 +51,6 @@ def main() -> None:
         if not path.exists():
             download(url, path)
             rename_font(path, font)
-    download(MODEL_URL, settings.models_dir / MODEL_FILE)
 
 
 if __name__ == "__main__":

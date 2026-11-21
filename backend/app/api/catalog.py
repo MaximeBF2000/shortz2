@@ -9,7 +9,7 @@ from app.captions.presets import PRESETS
 from app.captions.style import CaptionStyle
 from app.config import get_settings
 from app.pipeline.highlights.ollama import ollama_status
-from app.pipeline.transcribe import transcriber_status
+from app.pipeline import ai_service
 
 router = APIRouter(prefix="/api", tags=["catalog"])
 
@@ -47,4 +47,4 @@ def health():
         clip_finder = {"engine": "heuristic", "model": None, "ready": True, "problem": None}
     else:
         clip_finder = {"engine": "ollama", "model": settings.ollama_model, **ollama_status()}
-    return {"ok": True, "transcriber": transcriber_status(), "clip_finder": clip_finder}
+    return {"ok": True, "ai_service": ai_service.status(), "clip_finder": clip_finder}

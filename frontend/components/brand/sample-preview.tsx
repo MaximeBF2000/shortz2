@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 import { CaptionLayer } from "@/components/editor/preview/caption-layer";
-import { HookLayer } from "@/components/editor/preview/hook-layer";
 import { LogoLayer } from "@/components/editor/preview/logo-layer";
 import { Stage } from "@/components/editor/preview/stage";
 import { fetcher } from "@/lib/api";
@@ -49,7 +48,6 @@ export function SamplePreview({ style, logoUrl }: { style: ClipStyle; logoUrl: s
           // eslint-disable-next-line @next/next/no-img-element
           <img src={backdrop} alt="" className="absolute inset-0 size-full object-cover" />
         )}
-        <HookLayer text="Your hook goes here" style={style.hook} time={time % 3.5} />
         <CaptionLayer words={words} style={style.captions} time={time} />
         <LogoLayer url={logoUrl} style={style.logo} />
       </Stage>

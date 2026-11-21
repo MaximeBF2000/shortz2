@@ -25,7 +25,6 @@ class RenderJob:
     framing: dict
     style: ClipStyle
     words: list[Word]  # times relative to the clip start
-    hook: str
     logo: Path | None
     work_dir: Path
     output: Path
@@ -34,7 +33,7 @@ class RenderJob:
 def render_clip(job: RenderJob, on_progress: Callable[[float], None]) -> None:
     duration = job.end - job.start
     job.work_dir.mkdir(parents=True, exist_ok=True)
-    (job.work_dir / "captions.ass").write_text(build_ass(job.words, job.hook, job.style, duration), encoding="utf-8")
+    (job.work_dir / "captions.ass").write_text(build_ass(job.words, job.style), encoding="utf-8")
 
     if job.framing.get("mode") == "fit":
         frame = fit_filter()

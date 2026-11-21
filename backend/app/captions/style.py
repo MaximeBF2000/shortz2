@@ -27,16 +27,6 @@ class CaptionStyle(BaseModel):
     animation: Animation = "pop"
 
 
-class HookStyle(BaseModel):
-    enabled: bool = False  # opt-in from the editor's "Hook & logo" tab
-    duration: float = Field(3.0, ge=0.5, le=10)
-    font: str = "Montserrat"
-    font_size: int = Field(58, ge=30, le=120)
-    text_color: str = "#111111"
-    background_color: str = "#FFFFFF"
-    position: float = Field(0.2, ge=0.05, le=0.9)
-
-
 class LogoStyle(BaseModel):
     enabled: bool = False
     corner: LogoCorner = "top-right"
@@ -46,7 +36,6 @@ class LogoStyle(BaseModel):
 
 class ClipStyle(BaseModel):
     captions: CaptionStyle = CaptionStyle()
-    hook: HookStyle = HookStyle()
     logo: LogoStyle = LogoStyle()
     # Brand kit whose logo should be overlaid (the logo file lives on the kit).
     brand_kit_id: str | None = None

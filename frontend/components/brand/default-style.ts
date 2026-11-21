@@ -17,15 +17,6 @@ export const DEFAULT_STYLE: ClipStyle = {
     max_words: 3,
     animation: "pop",
   },
-  hook: {
-    enabled: false,
-    duration: 3,
-    font: "Montserrat",
-    font_size: 58,
-    text_color: "#111111",
-    background_color: "#FFFFFF",
-    position: 0.2,
-  },
   logo: { enabled: false, corner: "top-right", size: 160, opacity: 0.9 },
   brand_kit_id: null,
 };

@@ -17,8 +17,6 @@ For each clip, give:
 - start / end in seconds, taken from the transcript timestamps. Start at the first word of \
 the hook sentence and end after the last word of the payoff sentence.
 - title: a short, specific title for the creator's library (max 60 characters).
-- hook: an on-screen headline shown over the first seconds, written to stop the scroll \
-(max 50 characters, no hashtags, no emojis, sentence case).
 - score: 0-100, how likely it is to perform. Be honest and spread the scores out.
 - reason: one sentence on why it works.
 - keywords: 2 to 6 words spoken in the clip that deserve visual emphasis in captions \
@@ -37,8 +35,8 @@ def build_user_message(request: Request) -> str:
     ]
     if request.language:
         lines.append(
-            f"The video is in the language with ISO code '{request.language}'. Write the title, hook "
-            "and reason in that language, and copy keywords exactly as spoken."
+            f"The video is in the language with ISO code '{request.language}'. Write the title and "
+            "reason in that language, and copy keywords exactly as spoken."
         )
     if request.focus.strip():
         lines.append(f"The creator wants clips about: {request.focus.strip()}")

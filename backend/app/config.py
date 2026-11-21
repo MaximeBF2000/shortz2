@@ -13,14 +13,13 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://shortz:shortz@localhost:5432/shortz"
     data_dir: Path = Path("./data")
     fonts_dir: Path = Path("./fonts")
-    models_dir: Path = Path("./models")
 
     # Public URL of this API, used to build media links sent to the browser.
     public_api_url: str = "http://localhost:8000"
     cors_origins: list[str] = ["http://localhost:3000"]
 
-    # Transcription: the Shortz AI service running on the host Mac (see ai-server/).
-    transcriber_url: str = "http://localhost:8765"
+    # The Shortz AI service on the host Mac (ai-server/): transcription and framing.
+    ai_service_url: str = "http://localhost:8765"
 
     # Clip detection: a local Ollama model, or "heuristic" (no AI, picks by pace).
     clip_finder: Literal["ollama", "heuristic"] = "ollama"

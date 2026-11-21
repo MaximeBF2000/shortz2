@@ -19,16 +19,10 @@ export function ClipCard({ clip, index }: { clip: Clip; index: number }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={clip.thumbnail_url} alt="" className="size-full object-cover" />
         )}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 to-transparent" />
         <ScoreBadge score={clip.score} className="absolute top-3 left-3" />
         <span className="tabular absolute top-3 right-3 rounded-md bg-black/60 px-1.5 py-0.5 text-[12px]">
           {formatDuration(clip.end - clip.start)}
         </span>
-        {clip.hook && (
-          <p className="font-display absolute inset-x-3 bottom-3 text-[22px] leading-[0.95] font-extrabold uppercase">
-            {clip.hook}
-          </p>
-        )}
         {exporting && (
           <div className="absolute inset-x-3 top-12 rounded-lg bg-black/70 px-2.5 py-1.5 text-[12px]">
             Exporting {Math.round(clip.render_progress * 100)}%
