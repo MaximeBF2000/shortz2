@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { cropRect } from "@/lib/framing";
+import { rectAt } from "@/lib/framing";
 import { useLatest } from "@/lib/hooks/use-latest";
 import type { Framing } from "@/lib/types";
 
@@ -27,15 +27,18 @@ export function SourceOverview({ video, framing, aspect, onMove }: Props) {
       if (video.readyState >= 2 && video.videoWidth) {
         const { width, height } = canvas;
         context.drawImage(video, 0, 0, width, height);
-        const rect = cropRect(framingRef.current, video.videoWidth, video.videoHeight, video.currentTime);
+        const rect = rectAt(framingRef.current, video.videoWidth, video.videoHeight, video.currentTime);
         const scale = width / video.videoWidth;
         // Dim everything outside the crop window.
+        const [x0, y0, x1, y1] = [rect.x * scale, rect.y * scale, (rect.x + rect.width) * scale, (rect.y + rect.height) * scale];
         context.fillStyle = "rgba(10, 8, 14, 0.62)";
-        context.fillRect(0, 0, rect.x * scale, height);
-        context.fillRect((rect.x + rect.width) * scale, 0, width - (rect.x + rect.width) * scale, height);
+        context.fillRect(0, 0, width, y0);
+        context.fillRect(0, y1, width, height - y1);
+        context.fillRect(0, y0, x0, y1 - y0);
+        context.fillRect(x1, y0, width - x1, y1 - y0);
         context.strokeStyle = "#FFD83D";
         context.lineWidth = 3;
-        context.strokeRect(rect.x * scale + 1.5, rect.y * scale + 1.5, rect.width * scale - 3, rect.height * scale - 3);
+        context.strokeRect(x0 + 1.5, y0 + 1.5, x1 - x0 - 3, y1 - y0 - 3);
       }
       frame = requestAnimationFrame(draw);
     };

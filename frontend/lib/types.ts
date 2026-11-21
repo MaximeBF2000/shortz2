@@ -17,6 +17,7 @@ export interface ProjectSettings {
   language: string | null;
   focus: string;
   brand_kit_id: string | null;
+  smart_crop: boolean;
 }
 
 export interface ProjectSummary {
@@ -57,12 +58,21 @@ export interface TrackPoint {
   cut: boolean;
 }
 
+/** Smart-crop keyframe: the crop's size and vertical position, normalized. */
+export interface SmartPoint extends TrackPoint {
+  w: number;
+  top: number;
+  h: number;
+}
+
 export type FramingMode = "auto" | "fit" | "manual";
 
 export interface Framing {
   mode: FramingMode;
   manual_x: number;
+  smart_crop: boolean;
   track: TrackPoint[];
+  smart_track: SmartPoint[];
 }
 
 export type Animation = "highlight" | "pop" | "karaoke" | "single" | "none";
@@ -91,8 +101,15 @@ export interface LogoStyle {
   opacity: number;
 }
 
+/** What fills the frame when the kept part of the video isn't 9:16. */
+export interface FillStyle {
+  mode: "blur" | "color";
+  color: string;
+}
+
 export interface ClipStyle {
   captions: CaptionStyle;
+  fill: FillStyle;
   logo: LogoStyle;
   brand_kit_id: string | null;
 }
@@ -126,6 +143,7 @@ export interface ClipChanges {
   words?: CaptionWord[];
   framing_mode?: FramingMode;
   manual_x?: number;
+  smart_crop?: boolean;
   style?: ClipStyle;
 }
 

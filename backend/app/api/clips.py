@@ -35,13 +35,13 @@ def update_clip(clip_id: str, body: ClipUpdate, db: Session = Depends(get_db)):
         clip.words = [w.model_dump() for w in body.words]
     if body.style is not None:
         clip.style = body.style.model_dump()
-    if body.framing_mode is not None or body.manual_x is not None:
-        framing = dict(clip.framing)
-        if body.framing_mode is not None:
-            framing["mode"] = body.framing_mode
-        if body.manual_x is not None:
-            framing["manual_x"] = body.manual_x
-        clip.framing = framing
+    framing_changes = {
+        key: value
+        for key, value in (("mode", body.framing_mode), ("manual_x", body.manual_x), ("smart_crop", body.smart_crop))
+        if value is not None
+    }
+    if framing_changes:
+        clip.framing = {**clip.framing, **framing_changes}
 
     start = body.start if body.start is not None else clip.start
     end = body.end if body.end is not None else clip.end

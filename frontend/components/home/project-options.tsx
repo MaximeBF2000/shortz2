@@ -3,6 +3,7 @@
 import { Minus, Plus } from "lucide-react";
 
 import { Segmented } from "@/components/ui/segmented";
+import { Toggle } from "@/components/ui/toggle";
 import { inputClass } from "@/components/ui/field";
 import { useBrandKits } from "@/lib/hooks/use-catalog";
 import type { ClipLength, ProjectSettings } from "@/lib/types";
@@ -83,7 +84,7 @@ export function ProjectOptions({ settings, onChange }: Props) {
           ))}
         </select>
       </Option>
-      <div className="lg:col-span-4">
+      <div className="lg:col-span-3">
         <Option label="What should the clips be about? (optional)">
           <input
             value={settings.focus}
@@ -92,6 +93,13 @@ export function ProjectOptions({ settings, onChange }: Props) {
             className={inputClass}
             maxLength={500}
           />
+        </Option>
+      </div>
+      <div title="When the video is a designed layout (slides, frames, backgrounds), keep only the speaker's video panel.">
+        <Option label="Smart crop">
+          <div className="flex h-10 items-center rounded-[10px] bg-ink px-3">
+            <Toggle label="Keep only the speaker's panel" checked={settings.smart_crop} onChange={(smart_crop) => set({ smart_crop })} />
+          </div>
         </Option>
       </div>
     </div>

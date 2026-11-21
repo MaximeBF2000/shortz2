@@ -1,8 +1,9 @@
-"""Turn per-frame face detections into a smooth virtual camera path.
+"""Turn per-frame people detections into a smooth virtual camera path.
 
 Behaves like a calm camera operator: it locks on one subject per shot, ignores
 small movements (dead zone), eases toward the subject when it moves, and
-jumps instantly on hard cuts.
+jumps instantly on hard cuts. Each shot has a window the camera stays inside:
+the whole frame, or the video panel the speaker sits in (see panels.py).
 """
 
 from dataclasses import dataclass, field
@@ -24,13 +25,35 @@ class Sample:
 
 
 @dataclass
+class Window:
+    """Where the crop may sit during a shot, normalized to the source frame.
+
+    `width` is the crop width; the crop is as tall as the window (top..bottom).
+    """
+
+    width: float
+    left: float = 0.0
+    right: float = 1.0
+    top: float = 0.0
+    bottom: float = 1.0
+
+
+@dataclass
 class Keyframe:
     t: float
     x: float  # crop center, normalized 0..1 of source width
+    window: Window
     cut: bool = False
 
-    def as_dict(self) -> dict:
-        return {"t": round(self.t, 3), "x": round(self.x, 4), "cut": self.cut}
+    def as_dict(self, with_box: bool = False) -> dict:
+        point = {"t": round(self.t, 3), "x": round(self.x, 4), "cut": self.cut}
+        if with_box:  # smart crop: the crop size and vertical position can change per shot
+            point |= {
+                "w": round(self.window.width, 4),
+                "top": round(self.window.top, 4),
+                "h": round(self.window.bottom - self.window.top, 4),
+            }
+        return point
 
 
 @dataclass
@@ -56,11 +79,12 @@ def split_shots(samples: list[Sample]) -> list[Shot]:
     return shots
 
 
-def subject_positions(shot: Shot) -> list[float | None]:
+def subject_positions(shot: Shot, window: Window) -> list[float | None]:
     positions: list[float | None] = []
     following: float | None = None
     for sample in shot.samples:
-        face = pick_subject(sample.faces, following)
+        inside = [f for f in sample.faces if window.left <= f.x <= window.right]
+        face = pick_subject(inside, following)
         if face is not None:
             following = face.x
         positions.append(following)
@@ -69,24 +93,25 @@ def subject_positions(shot: Shot) -> list[float | None]:
     return [p if p is not None else first_known for p in positions]
 
 
-def camera_path(samples: list[Sample], crop_width: float) -> list[Keyframe]:
-    """crop_width is the crop window width as a fraction of the source width."""
-    half = crop_width / 2
+def camera_path(samples: list[Sample], windows: list[Window]) -> list[Keyframe]:
+    """One window per shot (see split_shots)."""
     keyframes: list[Keyframe] = []
 
-    for shot_index, shot in enumerate(split_shots(samples)):
-        positions = subject_positions(shot)
-        camera = positions[0] if positions[0] is not None else 0.5
+    for shot_index, (shot, window) in enumerate(zip(split_shots(samples), windows, strict=True)):
+        half = window.width / 2
+        low, high = window.left + half, window.right - half
+        positions = subject_positions(shot, window)
+        camera = positions[0] if positions[0] is not None else (window.left + window.right) / 2
         for sample, target in zip(shot.samples, positions, strict=True):
             cut = shot_index > 0 and sample is shot.samples[0]
             if target is not None:
                 distance = target - camera
-                if abs(distance) > JUMP * crop_width:
+                if abs(distance) > JUMP * window.width:
                     camera, cut = target, True  # new subject: cut to it
-                elif abs(distance) > DEAD_ZONE * crop_width:
+                elif abs(distance) > DEAD_ZONE * window.width:
                     camera += distance * EASE
-            camera = min(max(camera, half), 1 - half)
-            keyframes.append(Keyframe(sample.t, camera, cut=cut))
+            camera = min(max(camera, low), high) if low <= high else (window.left + window.right) / 2
+            keyframes.append(Keyframe(sample.t, camera, window, cut=cut))
 
     return simplify(keyframes)
 

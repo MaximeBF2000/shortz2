@@ -14,7 +14,7 @@ from app.models.project import ProjectStatus
 from app.pipeline import ingest, youtube
 from app.pipeline.highlights import Request, clip_words, find_clips
 from app.pipeline.transcribe import transcribe as speech_to_text
-from app.pipeline.reframe import analyze_clip, write_thumbnail
+from app.services.framing import update_framing
 from app.services.styles import default_style_for
 from app.worker.progress import project_progress, set_project_status
 
@@ -118,7 +118,13 @@ def create_clips(project_id: str) -> None:
                     start=candidate.start,
                     end=candidate.end,
                     words=clip_words(request.words, candidate.start, candidate.end, candidate.keywords),
-                    framing={"mode": "auto", "manual_x": 0.5, "track": []},
+                    framing={
+                        "mode": "auto",
+                        "manual_x": 0.5,
+                        "smart_crop": settings.get("smart_crop", True),
+                        "track": [],
+                        "smart_track": [],
+                    },
                     style=style,
                 )
             )
@@ -127,19 +133,11 @@ def create_clips(project_id: str) -> None:
 def frame_clips(project_id: str) -> None:
     set_project_status(project_id, ProjectStatus.FRAMING)
     report = project_progress(project_id)
-    source = storage.source_video(project_id)
     with session_scope() as db:
         project = db.get(Project, project_id)
         width, height = project.width, project.height
         clips = [(c.id, c.start, c.end) for c in project.clips]
 
     for index, (clip_id, start, end) in enumerate(clips):
-        folder = storage.clip_dir(project_id, clip_id)
-        thumbnail = folder / "thumb.jpg"
-        track = analyze_clip(source, start, end, width, height, folder)
-        write_thumbnail(source, track, start + min(1.0, (end - start) / 3), width, height, thumbnail)
-        with session_scope() as db:
-            clip = db.get(Clip, clip_id)
-            clip.framing = {**clip.framing, "track": track}
-            clip.thumbnail = storage.relative(thumbnail) if thumbnail.exists() else None
+        update_framing(clip_id, project_id, start, end, width, height)
         report((index + 1) / len(clips))

@@ -27,6 +27,13 @@ class CaptionStyle(BaseModel):
     animation: Animation = "pop"
 
 
+class FillStyle(BaseModel):
+    """What fills the frame when the kept part of the video isn't 9:16."""
+
+    mode: Literal["blur", "color"] = "blur"
+    color: str = "#000000"
+
+
 class LogoStyle(BaseModel):
     enabled: bool = False
     corner: LogoCorner = "top-right"
@@ -36,6 +43,7 @@ class LogoStyle(BaseModel):
 
 class ClipStyle(BaseModel):
     captions: CaptionStyle = CaptionStyle()
+    fill: FillStyle = FillStyle()
     logo: LogoStyle = LogoStyle()
     # Brand kit whose logo should be overlaid (the logo file lives on the kit).
     brand_kit_id: str | None = None

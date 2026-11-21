@@ -16,3 +16,7 @@ frontend/next-env.d.ts
 
 # ai-server
 ai-server/.venv/
+
+# panel-detection test samples (frames of third-party videos, kept local)
+ai-server/eval/samples/
+ai-server/eval/sheet.jpg

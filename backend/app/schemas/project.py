@@ -14,6 +14,7 @@ class ProjectSettings(BaseModel):
     language: str | None = None  # None = detect automatically
     focus: str = Field("", max_length=500)
     brand_kit_id: str | None = None
+    smart_crop: bool = True  # crop to the speaker's video panel in designed layouts
 
 
 class ProjectCreate(BaseModel):

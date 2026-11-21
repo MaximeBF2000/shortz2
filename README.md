@@ -9,7 +9,10 @@ and burns in animated captions in your brand's style.
   them, writes a title, and flags keywords for emphasis. Nothing
   leaves your machine and there's no API key.
 - **Speaker framing for 9:16**: faces (or upper bodies in wide shots) are found with
-  Apple's Vision framework and tracked shot by shot. The virtual camera stays
+  Apple's Vision framework and tracked shot by shot. With **smart crop** (on by default),
+  videos that are designed layouts (a camera panel next to slides, over a background…)
+  keep only the speaker's panel, never zoomed in; the leftover space is filled with a
+  blurred copy of the video or a solid color. The virtual camera stays
   calm (dead zone, easing) and cuts when the video cuts. You can also fix the position
   by hand or show the whole frame over a blurred background.
 - **Animated captions**: word-level timing from Parakeet Ultra (Whisper for languages it
@@ -71,6 +74,28 @@ Parakeet TDT v3, run with transcribe.cpp like the Handy app) handles its 25 Euro
 languages, English and French included; anything else goes to Whisper large-v3-turbo.
 Picking a language when creating a project skips detection.
 
+### Smart crop
+
+For each shot, the AI service looks for the video panel the speaker sits in: borders
+that stay perfectly still for the whole shot while the video inside moves. It starts
+from the speaker's face, finds the side borders, and takes the top and bottom from
+where those borders end (top/bottom lines are often faint). The box is only used if
+it's believable (borders along most of each side, big enough), and shots of the same
+video agree with each other since layouts repeat. When in doubt it does nothing.
+Faces that never move (photos on slides) count for less when choosing who to follow.
+
+`ai-server/eval/` holds a labeled test set for this:
+
+```bash
+cd ai-server
+uv run python eval/collect.py ~/video.mp4 myshow 95 845 1370   # 2 s samples
+# add each sample's expected box (or null) to eval/labels.json, then:
+uv run python eval/run.py --sheet                             # score + eval/sheet.jpg
+```
+
+Samples are frames of other people's videos, so they stay local (git-ignored); only
+the labels are committed.
+
 ## Configuration
 
 All settings are environment variables (see `.env.example`):
@@ -119,7 +144,8 @@ ai-server/               runs natively on the Mac (Metal, Neural Engine), not in
     server.py            HTTP API: /transcribe (streams progress) and /reframe
     models.py            model files (Hugging Face cache)
     transcription/       language ID, Parakeet Ultra (transcribe.cpp), Whisper fallback
-    framing/             Apple Vision people detection, shot cuts, virtual camera
+    framing/             Apple Vision people detection, shot cuts, layout panels, virtual camera
+  eval/                  labeled test set for layout-panel detection
     languages.py         which engine handles which language
 backend/
   app/
@@ -138,7 +164,7 @@ backend/
       reframe.py         framing through the AI service, 9:16 thumbnails
       highlights/        clip detection: prompt, Ollama call, heuristic, snapping
     captions/            caption style, presets, fonts, pagination of words
-    render/              .ass subtitles, crop/fit filters, final ffmpeg render
+    render/              crop + fill math, .ass subtitles, segment-by-segment ffmpeg render
     worker/              job queue, progress reporting, tasks
   scripts/download_assets.py   caption fonts
   tests/

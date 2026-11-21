@@ -15,7 +15,7 @@ export function ClipPreview({ clip, video, time }: { clip: Clip; video: HTMLVide
 
   return (
     <Stage className="rounded-[26px] bg-black">
-      <FramedVideo video={video} framing={clip.framing} />
+      <FramedVideo video={video} framing={clip.framing} fill={clip.style.fill} />
       <CaptionLayer words={clip.words} style={clip.style.captions} time={time} />
       <LogoLayer url={logoUrl} style={clip.style.logo} />
     </Stage>

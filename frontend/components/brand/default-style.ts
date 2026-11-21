@@ -17,6 +17,7 @@ export const DEFAULT_STYLE: ClipStyle = {
     max_words: 3,
     animation: "pop",
   },
+  fill: { mode: "blur", color: "#000000" },
   logo: { enabled: false, corner: "top-right", size: 160, opacity: 0.9 },
   brand_kit_id: null,
 };

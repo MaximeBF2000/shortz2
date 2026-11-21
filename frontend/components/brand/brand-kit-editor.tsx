@@ -5,6 +5,7 @@ import { Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { CaptionStyleEditor, Group } from "@/components/style/caption-style-editor";
+import { FillEditor } from "@/components/style/fill-editor";
 import { LogoStyleEditor } from "@/components/style/logo-style-editor";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
@@ -88,6 +89,12 @@ export function BrandKitEditor({ kit, onChange, onDelete }: { kit: BrandKit; onC
             <CaptionStyleEditor value={style.captions} onChange={(captions) => schedule({ style: { ...style, captions } })} />
           </Group>
           <div className="space-y-10">
+            <Group title="Empty space">
+              <p className="-mt-1 text-[12px] leading-relaxed text-faint">
+                Fills the frame around video that isn&apos;t vertical, like a layout&apos;s speaker panel.
+              </p>
+              <FillEditor value={style.fill} onChange={(fill) => schedule({ style: { ...style, fill } })} />
+            </Group>
             <Group title="Logo">
               <LogoUpload kit={kit} onChange={onChange} />
               {kit.logo_url && <LogoStyleEditor value={style.logo} onChange={(logo) => schedule({ style: { ...style, logo } })} />}

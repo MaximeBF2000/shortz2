@@ -19,10 +19,20 @@ class TrackPoint(BaseModel):
     cut: bool = False
 
 
+class SmartPoint(TrackPoint):
+    """Smart-crop keyframe: the crop's size and vertical position, normalized."""
+
+    w: float
+    top: float
+    h: float
+
+
 class Framing(BaseModel):
     mode: Literal["auto", "fit", "manual"] = "auto"
     manual_x: float = Field(0.5, ge=0, le=1)
+    smart_crop: bool = True  # keep only the speaker's video panel in designed layouts
     track: list[TrackPoint] = []
+    smart_track: list[SmartPoint] = []  # empty when no panel was found
 
 
 class ClipOut(BaseModel):
@@ -53,4 +63,5 @@ class ClipUpdate(BaseModel):
     words: list[CaptionWord] | None = None
     framing_mode: Literal["auto", "fit", "manual"] | None = None
     manual_x: float | None = Field(None, ge=0, le=1)
+    smart_crop: bool | None = None
     style: ClipStyle | None = None

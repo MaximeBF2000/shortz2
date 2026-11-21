@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS: ProjectSettings = {
   language: null,
   focus: "",
   brand_kit_id: null,
+  smart_crop: true,
 };
 
 export function NewProjectForm() {

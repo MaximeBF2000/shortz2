@@ -32,11 +32,13 @@ def escape(text: str) -> str:
     return text.replace("\\", "\\\\").replace("{", "(").replace("}", ")")
 
 
-def build_ass(words: list[Word], style: ClipStyle) -> str:
+def build_ass(words: list[Word], style: ClipStyle, offset: float = 0.0) -> str:
+    """`offset` shifts every caption earlier: a clip rendered in segments gets one
+    file per segment, timed from that segment's start."""
     captions = style.captions
     lines = [header(captions)]
     if captions.enabled:
-        lines.extend(caption_events(words, captions))
+        lines.extend(caption_events(words, captions, offset))
     return "\n".join(lines) + "\n"
 
 
@@ -67,7 +69,7 @@ def header(captions: CaptionStyle) -> str:
     )
 
 
-def caption_events(words: list[Word], style: CaptionStyle) -> list[str]:
+def caption_events(words: list[Word], style: CaptionStyle, offset: float = 0.0) -> list[str]:
     max_words = 1 if style.animation == "single" else style.max_words
     pages = build_pages(words, max_words, style.font_size)
     y = round(style.position * HEIGHT)
@@ -75,18 +77,21 @@ def caption_events(words: list[Word], style: CaptionStyle) -> list[str]:
     for page in pages:
         if style.animation in ("none", "single"):
             # One static event per page.
-            events.append(dialogue(page.start, page.end, page_text(page, style, None), y, pop=True))
+            events.append(dialogue(page.start - offset, page.end - offset, page_text(page, style, None), y, pop=True))
             continue
         for index, word in enumerate(page.words):
             start = page.start if index == 0 else word.start
             end = page.active_until(index)
             if end - start < 0.01:
                 continue
-            events.append(dialogue(start, end, page_text(page, style, index), y, pop=index == 0 and style.animation == "pop"))
-    return events
+            pop = index == 0 and style.animation == "pop"
+            events.append(dialogue(start - offset, end - offset, page_text(page, style, index), y, pop))
+    return [event for event in events if event is not None]
 
 
-def dialogue(start: float, end: float, text: str, y: int, pop: bool) -> str:
+def dialogue(start: float, end: float, text: str, y: int, pop: bool) -> str | None:
+    if end <= 0:
+        return None  # over before this segment starts
     tags = f"\\an5\\pos({WIDTH // 2},{y})"
     if pop:
         tags += r"\fscx82\fscy82\t(0,110,\fscx100\fscy100)"

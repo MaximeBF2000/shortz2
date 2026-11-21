@@ -80,7 +80,7 @@ export function useClipEditor(clipId: string) {
 }
 
 function applyChanges(clip: Clip, changes: ClipChanges): Clip {
-  const { framing_mode, manual_x, ...rest } = changes;
+  const { framing_mode, manual_x, smart_crop, ...rest } = changes;
   return {
     ...clip,
     ...rest,
@@ -88,6 +88,7 @@ function applyChanges(clip: Clip, changes: ClipChanges): Clip {
       ...clip.framing,
       ...(framing_mode !== undefined && { mode: framing_mode }),
       ...(manual_x !== undefined && { manual_x }),
+      ...(smart_crop !== undefined && { smart_crop }),
     },
   };
 }

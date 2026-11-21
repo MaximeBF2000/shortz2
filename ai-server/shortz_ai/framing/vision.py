@@ -18,6 +18,7 @@ class Face:
     y: float  # center, normalized 0..1 of frame height (top to bottom)
     size: float  # width, normalized
     score: float
+    height: float = 0.0  # normalized
 
     @property
     def weight(self) -> float:
@@ -51,4 +52,5 @@ def to_face(box, confidence: float, width_scale: float = 1.0) -> Face:
         y=1 - (box.origin.y + box.size.height / 2),
         size=box.size.width * width_scale,
         score=float(confidence),
+        height=box.size.height * width_scale,
     )

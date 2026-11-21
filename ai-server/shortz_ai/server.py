@@ -4,7 +4,7 @@
 
 POST /transcribe  audio (16 kHz mono wav) -> newline-delimited JSON: {"progress": 0.4}
                   lines while working, then {"result": {...}} or {"error": "..."}.
-POST /reframe     a small copy of a clip -> {"track": [{t, x, cut}]}
+POST /reframe     a small copy of a clip -> {"track": [...], "smart_track": [...]}
 """
 
 import json
@@ -63,7 +63,7 @@ def transcribe(audio: UploadFile = File(...), language: str = Form("")):
 def reframe(video: UploadFile = File(...), source_aspect: float = Form(...)):
     path = save_upload(video, ".mp4")
     try:
-        return {"track": gpu.submit(analyze_clip, path, source_aspect).result()}
+        return gpu.submit(analyze_clip, path, source_aspect).result()
     except Exception as error:
         raise HTTPException(500, f"{type(error).__name__}: {error}") from error
     finally:
