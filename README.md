@@ -4,6 +4,8 @@ Turn long videos into captioned vertical shorts. Paste a YouTube link or upload 
 Shortz transcribes it, finds the moments worth posting, keeps the speaker in frame
 and burns in animated captions in your brand's style.
 
+![Demo](./README_demo.mp4)
+
 - **Best clip detection**: a local LLM (Ollama, `qwen3.6:35b-mlx` by default) reads the
   timestamped transcript and picks self-contained moments with a hook and a payoff, scores
   them, writes a title, and flags keywords for emphasis. Nothing
